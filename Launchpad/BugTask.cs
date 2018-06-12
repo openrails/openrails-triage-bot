@@ -17,6 +17,7 @@ namespace Open_Rails_Triage_Bot.Launchpad
 	{
 		public string self_link;
 		public string bug_link;
+		public string web_link;
 	}
 
 	#pragma warning restore CS0649

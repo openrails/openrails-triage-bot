@@ -58,6 +58,8 @@ namespace Open_Rails_Triage_Bot
 				var bug = await bugTask.GetBug();
 				var attachments = await bug.GetAttachments();
 
+				Console.WriteLine($"{bugTask.Json.web_link} - {bug.Name}");
+
 				if (IsBugCrashMissingLog(bug, attachments))
 				{
 					await bug.AddUniqueMessage(
