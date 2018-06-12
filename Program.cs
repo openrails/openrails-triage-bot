@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Configuration;
@@ -41,14 +43,53 @@ namespace Open_Rails_Triage_Bot
 
 		static async Task AsyncMain(IConfigurationRoot config)
 		{
-			await LogInToLaunchpad(config.GetSection("launchpad"));
+			var launchpadConfig = config.GetSection("launchpad");
+
+			var loggedIn = await LogInToLaunchpad(launchpadConfig);
+			if (!loggedIn) {
+				return;
+			}
+
+			var launchpad = new Launchpad.Cache(launchpadConfig["oauth_token"], launchpadConfig["oauth_token_secret"]);
+			var project = await launchpad.GetProject($"https://api.launchpad.net/devel/{launchpadConfig["project"]}");
+
+			foreach (var bugTask in await project.GetRecentBugTasks())
+			{
+				var bug = await bugTask.GetBug();
+				var attachments = await bug.GetAttachments();
+
+				if (IsBugCrashMissingLog(bug, attachments))
+				{
+					await bug.AddUniqueMessage(
+						"Automated response (ORTB-C1)",
+						"Hello human, I am the Open Rails Triage Bot (https://github.com/openrails/openrails-triage-bot).\n" +
+						"\n" +
+						"It looks to me like you are reporting a crash in Open Rails, but I don't see a log file attached to this bug. To help my human friends diagnose what has gone wrong, it would be greatly appreciated if you could attach the complete 'OpenRailsLog.txt' file from your desktop to this bug.\n" +
+						"\n" +
+						"If you have provided the log file and I've missed it, don't worry - I won't ask about this again and the humans will know what to do.\n"
+					);
+				}
+			}
+		}
+
+		static bool IsBugCrashMissingLog(Launchpad.Bug bug, List<Launchpad.Attachment> attachments)
+		{
+			var now = DateTimeOffset.UtcNow;
+			var crash = new Regex(@"\b(?:crash|crashes|crashed)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+			var logContents = "This is a log file for Open Rails. Please include this file in bug reports.";
+			var log = new Regex(@"\b(?:OpenRailsLog\.txt)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+			return (now - bug.Created).TotalDays < 7 &&
+				(crash.IsMatch(bug.Name) || crash.IsMatch(bug.Description)) &&
+				!bug.Description.Contains(logContents) &&
+				!attachments.Any(attachment => log.IsMatch(attachment.Name));
 		}
 
 		static HttpClient Client = new HttpClient();
-		static async Task LogInToLaunchpad(IConfigurationSection config)
+		static async Task<bool> LogInToLaunchpad(IConfigurationSection config)
 		{
 			if ((config["oauth_token"] ?? "").Length > 0 && (config["oauth_token_secret"] ?? "").Length > 0) {
-				return;
+				return true;
 			}
 
 			var requestToken = await Client.PostAsync(
@@ -88,6 +129,8 @@ namespace Open_Rails_Triage_Bot
 			Console.WriteLine($"        \"oauth_token_secret\": \"{decodedAccess["oauth_token_secret"]}\"");
 			Console.WriteLine("    }");
 			Console.WriteLine("}");
+
+			return false;
 		}
 	}
 }
