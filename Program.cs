@@ -60,7 +60,7 @@ namespace Open_Rails_Triage_Bot
 
 				Console.WriteLine($"{bugTask.Json.web_link} - {bug.Name}");
 
-				if (IsBugCrashMissingLog(bug, attachments))
+				if (IsBugCrashMissingLog(bug, bugTask, attachments))
 				{
 					await bug.AddUniqueMessage(
 						"Automated response (ORTB-C1)",
@@ -74,7 +74,7 @@ namespace Open_Rails_Triage_Bot
 			}
 		}
 
-		static bool IsBugCrashMissingLog(Launchpad.Bug bug, List<Launchpad.Attachment> attachments)
+		static bool IsBugCrashMissingLog(Launchpad.Bug bug, Launchpad.BugTask bugTask, List<Launchpad.Attachment> attachments)
 		{
 			var now = DateTimeOffset.UtcNow;
 			var crash = new Regex(@"\b(?:crash|crashes|crashed)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -82,6 +82,7 @@ namespace Open_Rails_Triage_Bot
 			var log = new Regex(@"\b(?:OpenRailsLog\.txt)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
 			return (now - bug.Created).TotalDays < 7 &&
+				bugTask.Status == Launchpad.Status.New &&
 				(crash.IsMatch(bug.Name) || crash.IsMatch(bug.Description)) &&
 				!bug.Description.Contains(logContents) &&
 				!attachments.Any(attachment => log.IsMatch(attachment.Name));
