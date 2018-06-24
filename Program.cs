@@ -68,7 +68,7 @@ namespace Open_Rails_Triage_Bot
 						"\n" +
 						"It looks to me like you are reporting a crash in Open Rails, but I don't see a log file attached to this bug. To help my human friends diagnose what has gone wrong, it would be greatly appreciated if you could attach the complete 'OpenRailsLog.txt' file from your desktop to this bug.\n" +
 						"\n" +
-						"If you have provided the log file and I've missed it, don't worry - I won't ask about this again and the humans will know what to do.\n"
+						"If you have provided the log file and I've missed it, or you're not actually reporting a crash, don't worry - I won't ask about this again and the humans will know what to do.\n"
 					);
 				}
 			}
