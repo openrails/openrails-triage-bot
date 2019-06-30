@@ -17,7 +17,7 @@ namespace Open_Rails_Triage_Bot
 		{
 			var config = new CommandLineParser.Arguments.FileArgument('c', "config")
 			{
-				DefaultValue = new FileInfo("config.json")
+				ForcedDefaultValue = new FileInfo("config.json")
 			};
 
 			var commandLineParser = new CommandLineParser.CommandLineParser()
