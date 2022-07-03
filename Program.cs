@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 using System.Web;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace Open_Rails_Triage_Bot
 {
@@ -46,7 +39,8 @@ namespace Open_Rails_Triage_Bot
 			var launchpadConfig = config.GetSection("launchpad");
 
 			var loggedIn = await LogInToLaunchpad(launchpadConfig);
-			if (!loggedIn) {
+			if (!loggedIn)
+			{
 				return;
 			}
 
@@ -88,10 +82,11 @@ namespace Open_Rails_Triage_Bot
 				!attachments.Any(attachment => log.IsMatch(attachment.Name));
 		}
 
-		static HttpClient Client = new HttpClient();
+		static readonly HttpClient Client = new();
 		static async Task<bool> LogInToLaunchpad(IConfigurationSection config)
 		{
-			if ((config["oauth_token"] ?? "").Length > 0 && (config["oauth_token_secret"] ?? "").Length > 0) {
+			if ((config["oauth_token"] ?? "").Length > 0 && (config["oauth_token_secret"] ?? "").Length > 0)
+			{
 				return true;
 			}
 
@@ -115,7 +110,7 @@ namespace Open_Rails_Triage_Bot
 			var accessToken = await Client.PostAsync(
 				"https://launchpad.net/+access-token",
 				new FormUrlEncodedContent(new Dictionary<string, string> {
-					{ "oauth_token", decodedRequest["oauth_token"] },
+					{ "oauth_token", decodedRequest["oauth_token"] ?? "" },
 					{ "oauth_consumer_key", "Open Rails Triage Bot" },
 					{ "oauth_signature_method", "PLAINTEXT" },
 					{ "oauth_signature", "&" + decodedRequest["oauth_token_secret"] }

@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 namespace Open_Rails_Triage_Bot.Launchpad
 {
-	#pragma warning disable CS0649
+#pragma warning disable CS0649
 
 	class JsonProject
 	{
-		public string self_link;
+		public string self_link = "";
 	}
 
-	#pragma warning restore CS0649
+#pragma warning restore CS0649
 
 	public class Project
 	{

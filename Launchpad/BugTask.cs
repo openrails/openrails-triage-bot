@@ -4,24 +4,24 @@ using System.Threading.Tasks;
 
 namespace Open_Rails_Triage_Bot.Launchpad
 {
-	#pragma warning disable CS0649
+#pragma warning disable CS0649
 
 	class JsonBugTaskCollection
 	{
-		public JsonBugTask[] entries;
+		public JsonBugTask[] entries = new JsonBugTask[0];
 		public string next_collection_link;
 		public JsonBugTaskCollection(string url) => next_collection_link = url;
 	}
 
 	class JsonBugTask
 	{
-		public string self_link;
-		public string status;
-		public string bug_link;
-		public string web_link;
+		public string self_link = "";
+		public string status = "";
+		public string bug_link = "";
+		public string web_link = "";
 	}
 
-	#pragma warning restore CS0649
+#pragma warning restore CS0649
 
 	public enum Status
 	{
@@ -41,7 +41,7 @@ namespace Open_Rails_Triage_Bot.Launchpad
 
 	public class BugTask
 	{
-		static Dictionary<string, Status> StatusMapping = new Dictionary<string, Status>()
+		static readonly Dictionary<string, Status> StatusMapping = new()
 		{
 			{ "New", Status.New },
 			{ "Incomplete", Status.Incomplete },
