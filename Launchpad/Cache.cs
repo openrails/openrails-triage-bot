@@ -19,28 +19,29 @@ namespace Open_Rails_Triage_Bot.Launchpad
 			OAuthTokenSecret = oauthTokenSecret;
 		}
 
-		AuthenticationHeaderValue GetAuthorizationHeader() {
+		AuthenticationHeaderValue GetAuthorizationHeader()
+		{
 			return new AuthenticationHeaderValue("OAuth", $"realm=\"https://api.launchpad.net/\",oauth_consumer_key=\"Open Rails Triage Bot\",oauth_token=\"{OAuthToken}\",oauth_signature_method=\"PLAINTEXT\",oauth_signature=\"%26{OAuthTokenSecret}\",oauth_timestamp=\"{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}\",oauth_nonce=\"0\",oauth_version=\"1.0\"");
 		}
 
-		HttpClient Client = new HttpClient();
-		Dictionary<string, Project> Projects = new Dictionary<string, Project>();
-		Dictionary<string, List<BugTask>> BugTaskCollections = new Dictionary<string, List<BugTask>>();
-		Dictionary<string, BugTask> BugTasks = new Dictionary<string, BugTask>();
-		Dictionary<string, Bug> Bugs = new Dictionary<string, Bug>();
-		Dictionary<string, List<Message>> MessageCollections = new Dictionary<string, List<Message>>();
-		Dictionary<string, Message> Messages = new Dictionary<string, Message>();
-		Dictionary<string, List<Attachment>> AttachmentCollections = new Dictionary<string, List<Attachment>>();
-		Dictionary<string, Attachment> Attachments = new Dictionary<string, Attachment>();
+		readonly HttpClient Client = new();
+		readonly Dictionary<string, Project> Projects = new();
+		readonly Dictionary<string, List<BugTask>> BugTaskCollections = new();
+		readonly Dictionary<string, BugTask> BugTasks = new();
+		readonly Dictionary<string, Bug> Bugs = new();
+		readonly Dictionary<string, List<Message>> MessageCollections = new();
+		readonly Dictionary<string, Message> Messages = new();
+		readonly Dictionary<string, List<Attachment>> AttachmentCollections = new();
+		readonly Dictionary<string, Attachment> Attachments = new();
 
 		internal async Task<T> Get<T>(string url)
 		{
 			var response = await Client.GetAsync(url);
 			var text = await response.Content.ReadAsStringAsync();
-			return JsonConvert.DeserializeObject<T>(text);
+			return JsonConvert.DeserializeObject<T>(text) ?? throw new InvalidDataException("Unable to parse response text");
 		}
 
-		internal async Task Post(string url, Dictionary<string, string> data)
+		internal void Post(string url, Dictionary<string, string> data)
 		{
 			var request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Headers.Authorization = GetAuthorizationHeader();

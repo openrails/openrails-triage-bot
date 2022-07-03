@@ -5,19 +5,19 @@ using System.Threading.Tasks;
 
 namespace Open_Rails_Triage_Bot.Launchpad
 {
-	#pragma warning disable CS0649
+#pragma warning disable CS0649
 
 	class JsonBug
 	{
-		public string self_link;
-		public string title;
-		public string description;
+		public string self_link = "";
+		public string title = "";
+		public string description = "";
 		public DateTimeOffset date_created;
-		public string messages_collection_link;
-		public string attachments_collection_link;
+		public string messages_collection_link = "";
+		public string attachments_collection_link = "";
 	}
 
-	#pragma warning restore CS0649
+#pragma warning restore CS0649
 
 	public class Bug
 	{
@@ -30,12 +30,13 @@ namespace Open_Rails_Triage_Bot.Launchpad
 		public async Task AddUniqueMessage(string name, string description)
 		{
 			var messages = await GetMessages();
-			if (!messages.Any(message => message.Name == name)) {
-				await AddMessage(name, description);
+			if (!messages.Any(message => message.Name == name))
+			{
+				AddMessage(name, description);
 			}
 		}
 
-		async Task AddMessage(string name, string description) => await Cache.Post(Json.self_link, new Dictionary<string, string> {
+		void AddMessage(string name, string description) => Cache.Post(Json.self_link, new Dictionary<string, string> {
 			{ "ws.op", "newMessage" },
 			{ "subject", name },
 			{ "content", description },
